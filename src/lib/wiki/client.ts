@@ -68,6 +68,8 @@ async function fetchWikipediaPage(lang: WikiLang, title: string): Promise<WikiPa
   url.searchParams.set('page', normalizeTitle(title));
   url.searchParams.set('prop', 'text|links');
   url.searchParams.set('redirects', '1');
+  url.searchParams.set('disableeditsection', '1');
+  url.searchParams.set('useskin', 'minerva');
   url.searchParams.set('format', 'json');
   url.searchParams.set('formatversion', '2');
 
@@ -84,7 +86,7 @@ async function fetchWikipediaPage(lang: WikiLang, title: string): Promise<WikiPa
 
   return {
     title: normalizeTitle(data.parse.title),
-    html: sanitizeWikiHtml(data.parse.text, links),
+    html: sanitizeWikiHtml(data.parse.text, links, lang),
     links,
   };
 }

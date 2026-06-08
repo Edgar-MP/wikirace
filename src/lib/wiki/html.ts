@@ -1,4 +1,5 @@
 import sanitizeHtml from 'sanitize-html';
+import type { WikiLang } from '@/lib/config';
 import { normalizeTitle, titleFromHref, titleKey } from './title';
 
 export function filterArticleLinks(links: string[]) {
@@ -24,7 +25,7 @@ export function canNavigateTo(links: string[], toTitle: string) {
   return links.some((link) => titleKey(link) === targetKey);
 }
 
-export function sanitizeWikiHtml(html: string, validLinks: string[]) {
+export function sanitizeWikiHtml(html: string, validLinks: string[], lang: WikiLang = 'es') {
   const validLinkMap = new Map(validLinks.map((link) => [titleKey(link), normalizeTitle(link)]));
 
   return sanitizeHtml(html, {
@@ -69,7 +70,7 @@ export function sanitizeWikiHtml(html: string, validLinks: string[]) {
       'ul',
     ],
     allowedAttributes: {
-      a: ['href', 'title', 'data-wiki-title', 'class'],
+      a: ['href', 'title', 'data-wiki-title', 'data-wiki-page', 'class'],
       img: ['src', 'srcset', 'alt', 'width', 'height', 'loading', 'decoding', 'class'],
       table: ['class', 'style'],
       td: ['class', 'colspan', 'rowspan', 'style'],
@@ -107,9 +108,10 @@ export function sanitizeWikiHtml(html: string, validLinks: string[]) {
         return {
           tagName: 'a',
           attribs: {
-            href: '#',
+            href: `https://${lang}.wikipedia.org/wiki/${encodeURIComponent(canonicalTitle.replaceAll(' ', '_'))}`,
             class: 'wiki-link',
             'data-wiki-title': canonicalTitle,
+            'data-wiki-page': canonicalTitle.replaceAll(' ', '_'),
           },
         };
       },

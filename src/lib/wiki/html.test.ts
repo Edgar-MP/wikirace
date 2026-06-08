@@ -24,6 +24,8 @@ describe('wiki html helpers', () => {
 
     const sanitized = sanitizeWikiHtml(html, ['Ada Lovelace']);
     expect(sanitized).toContain('data-wiki-title="Ada Lovelace"');
+    expect(sanitized).toContain('data-wiki-page="Ada_Lovelace"');
+    expect(sanitized).toContain('href="https://es.wikipedia.org/wiki/Ada_Lovelace"');
     expect(sanitized).toContain('src="https://upload.wikimedia.org/example.jpg"');
     expect(sanitized).not.toContain('onclick');
     expect(sanitized).not.toContain('<script>');
