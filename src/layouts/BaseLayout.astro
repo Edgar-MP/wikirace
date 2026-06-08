@@ -2,6 +2,9 @@
 import '@/styles/global.css';
 
 const { title = 'WikiRace' } = Astro.props;
+
+const umamiUrl = import.meta.env.UMAMI_URL;
+const umamiWebsiteId = import.meta.env.UMAMI_WEBSITE_ID;
 ---
 
 <!doctype html>
@@ -14,6 +17,9 @@ const { title = 'WikiRace' } = Astro.props;
       content="Carreras entre artículos de Wikipedia: llega al objetivo con el menor número de clicks."
     />
     <title>{title}</title>
+    {umamiUrl && umamiWebsiteId && (
+      <script defer src={umamiUrl} data-website-id={umamiWebsiteId}></script>
+    )}
   </head>
   <body>
     <header class="border-b border-stone-200 bg-[#fffdf7]/90 backdrop-blur">

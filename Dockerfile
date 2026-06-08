@@ -17,7 +17,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable
 COPY --from=build /app/dist ./dist
+COPY --from=build /app/drizzle ./drizzle
+COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
 RUN pnpm install --prod --frozen-lockfile
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 EXPOSE 4321
-CMD ["node", "dist/server/entry.mjs"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
