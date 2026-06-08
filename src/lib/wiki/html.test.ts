@@ -18,7 +18,7 @@ describe('wiki html helpers', () => {
     const html = `
       <p><a href="/wiki/Ada_Lovelace" onclick="alert(1)">Ada</a></p>
       <p><a href="/wiki/Special:Random">Random</a></p>
-      <img src="https://upload.wikimedia.org/example.jpg" alt="Example" onclick="alert(1)" />
+      <img src="//upload.wikimedia.org/example.jpg" srcset="//upload.wikimedia.org/example-2x.jpg 2x" alt="Example" onclick="alert(1)" />
       <script>alert(1)</script>
     `;
 
@@ -27,8 +27,15 @@ describe('wiki html helpers', () => {
     expect(sanitized).toContain('data-wiki-page="Ada_Lovelace"');
     expect(sanitized).toContain('href="https://es.wikipedia.org/wiki/Ada_Lovelace"');
     expect(sanitized).toContain('src="https://upload.wikimedia.org/example.jpg"');
+    expect(sanitized).toContain('srcset="https://upload.wikimedia.org/example-2x.jpg 2x"');
     expect(sanitized).not.toContain('onclick');
     expect(sanitized).not.toContain('<script>');
     expect(sanitized).toContain('disabled-link');
+  });
+
+  it('drops non-Wikimedia images', () => {
+    const sanitized = sanitizeWikiHtml('<img src="https://example.com/tracker.png" />', []);
+    expect(sanitized).not.toContain('<img');
+    expect(sanitized).toContain('disabled-image');
   });
 });

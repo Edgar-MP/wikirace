@@ -25,6 +25,48 @@ export function canNavigateTo(links: string[], toTitle: string) {
   return links.some((link) => titleKey(link) === targetKey);
 }
 
+function normalizeMediaUrl(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  if (value.startsWith('//upload.wikimedia.org/')) {
+    return `https:${value}`;
+  }
+
+  if (value.startsWith('https://upload.wikimedia.org/')) {
+    return value;
+  }
+
+  if (value.startsWith('http://upload.wikimedia.org/')) {
+    return value.replace('http://', 'https://');
+  }
+
+  return undefined;
+}
+
+function normalizeSrcSet(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  const entries = value
+    .split(',')
+    .map((entry) => entry.trim())
+    .map((entry) => {
+      const [url, descriptor] = entry.split(/\s+/, 2);
+      const normalizedUrl = normalizeMediaUrl(url);
+      if (!normalizedUrl) {
+        return null;
+      }
+
+      return descriptor ? `${normalizedUrl} ${descriptor}` : normalizedUrl;
+    })
+    .filter((entry): entry is string => Boolean(entry));
+
+  return entries.length > 0 ? entries.join(', ') : undefined;
+}
+
 export function sanitizeWikiHtml(html: string, validLinks: string[], lang: WikiLang = 'es') {
   const validLinkMap = new Map(validLinks.map((link) => [titleKey(link), normalizeTitle(link)]));
 
@@ -92,6 +134,33 @@ export function sanitizeWikiHtml(html: string, validLinks: string[], lang: WikiL
     },
     disallowedTagsMode: 'discard',
     transformTags: {
+      img: (_tagName, attribs) => {
+        const src = normalizeMediaUrl(attribs.src);
+        if (!src) {
+          return {
+            tagName: 'span',
+            attribs: {
+              class: 'disabled-image',
+            },
+          };
+        }
+
+        const normalizedSrcSet = normalizeSrcSet(attribs.srcset);
+
+        return {
+          tagName: 'img',
+          attribs: {
+            src,
+            ...(normalizedSrcSet ? { srcset: normalizedSrcSet } : {}),
+            ...(attribs.alt ? { alt: attribs.alt } : { alt: '' }),
+            ...(attribs.width ? { width: attribs.width } : {}),
+            ...(attribs.height ? { height: attribs.height } : {}),
+            ...(attribs.class ? { class: attribs.class } : {}),
+            decoding: attribs.decoding ?? 'async',
+            loading: attribs.loading ?? 'lazy',
+          },
+        };
+      },
       a: (_tagName, attribs) => {
         const title = titleFromHref(attribs.href);
         const canonicalTitle = title ? validLinkMap.get(titleKey(title)) : null;
