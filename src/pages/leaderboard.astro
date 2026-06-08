@@ -1,0 +1,35 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import LeaderboardTable from '@/components/LeaderboardTable.astro';
+import { getLeaderboard } from '@/lib/game/service';
+import type { LeaderboardRow } from '@/lib/game/service';
+
+let rows: LeaderboardRow[] = [];
+let error = '';
+
+try {
+  rows = await getLeaderboard(50);
+} catch (caughtError) {
+  error = caughtError instanceof Error ? caughtError.message : 'No se pudo cargar el ranking.';
+}
+---
+
+<BaseLayout title="Ranking - WikiRace">
+  <section class="mx-auto max-w-6xl px-4 py-12">
+    <p class="text-sm font-bold uppercase tracking-[0.16em] text-sky-800">Ranking</p>
+    <h1 class="mt-2 text-4xl font-black text-stone-950">Carreras completadas</h1>
+    <p class="mt-3 max-w-2xl text-stone-700">
+      Ordenado por menor número de clicks y, en empate, por menor tiempo.
+    </p>
+
+    <div class="mt-8">
+      {error ? (
+        <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950">
+          Configura la base de datos para ver el ranking. Detalle: {error}
+        </div>
+      ) : (
+        <LeaderboardTable rows={rows} />
+      )}
+    </div>
+  </section>
+</BaseLayout>

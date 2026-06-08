@@ -1,0 +1,47 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import GameClient from '@/components/GameClient';
+import { getRunState } from '@/lib/game/service';
+
+const runId = Astro.params.runId;
+let state = null;
+let error = '';
+
+if (!runId) {
+  return Astro.redirect('/');
+}
+
+try {
+  state = await getRunState(runId);
+  if (!state) {
+    error = 'No existe esta carrera.';
+  } else if (state.run.status !== 'active') {
+    return Astro.redirect('/leaderboard');
+  }
+} catch (caughtError) {
+  error = caughtError instanceof Error ? caughtError.message : 'No se pudo cargar la carrera.';
+}
+---
+
+<BaseLayout title="Carrera - WikiRace">
+  <section class="bg-[#f7f5ef] px-4 py-8">
+    <div class="mx-auto max-w-7xl">
+      {error || !state ? (
+        <div class="rounded-lg border border-red-200 bg-red-50 p-5 text-red-900">
+          <strong class="block">No se pudo abrir la carrera</strong>
+          {error}
+          <a class="mt-4 block font-bold underline underline-offset-4" href="/">Volver al inicio</a>
+        </div>
+      ) : (
+        <GameClient
+          client:load
+          runId={state.run.id}
+          initialTitle={state.run.currentTitle}
+          targetTitle={state.challenge.targetTitle}
+          lang={state.challenge.lang}
+          initialClicks={state.run.clicks}
+        />
+      )}
+    </div>
+  </section>
+</BaseLayout>

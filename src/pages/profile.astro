@@ -1,0 +1,79 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCurrentUser } from '@/lib/auth/session';
+import { getUserRuns } from '@/lib/game/service';
+import type { CurrentUser } from '@/lib/auth/session';
+
+let currentUser: CurrentUser | null = null;
+let runs: Awaited<ReturnType<typeof getUserRuns>> = [];
+let error = '';
+
+try {
+  currentUser = await getCurrentUser(Astro.cookies);
+  if (currentUser) {
+    runs = await getUserRuns(currentUser.id);
+  }
+} catch (caughtError) {
+  error = caughtError instanceof Error ? caughtError.message : 'No se pudo cargar el perfil.';
+}
+---
+
+<BaseLayout title="Perfil - WikiRace">
+  <section class="mx-auto max-w-5xl px-4 py-12">
+    {error ? (
+      <div class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-950">{error}</div>
+    ) : currentUser ? (
+      <>
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p class="text-sm font-bold uppercase tracking-[0.16em] text-sky-800">Perfil</p>
+            <h1 class="mt-2 text-4xl font-black text-stone-950">{currentUser.displayName}</h1>
+            <p class="mt-1 text-stone-600">{currentUser.email}</p>
+          </div>
+          <form method="post" action="/api/auth/logout">
+            <button class="rounded-md border border-stone-300 px-4 py-2 font-bold text-stone-700">Salir</button>
+          </form>
+        </div>
+
+        <h2 class="mt-10 text-2xl font-black text-stone-950">Historial</h2>
+        {runs.length === 0 ? (
+          <p class="mt-4 rounded-lg border border-dashed border-stone-300 bg-stone-50 p-6 text-stone-600">
+            Aún no has jugado ninguna carrera con esta cuenta.
+          </p>
+        ) : (
+          <div class="mt-4 overflow-hidden rounded-lg border border-stone-200 bg-white">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-stone-100 text-xs uppercase tracking-[0.12em] text-stone-600">
+                <tr>
+                  <th class="px-4 py-3">Ruta</th>
+                  <th class="px-4 py-3">Estado</th>
+                  <th class="px-4 py-3 text-right">Clicks</th>
+                  <th class="px-4 py-3 text-right">Tiempo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {runs.map((run) => (
+                  <tr class="border-t border-stone-200">
+                    <td class="px-4 py-3">{run.startTitle} -> {run.targetTitle}</td>
+                    <td class="px-4 py-3">{run.status}</td>
+                    <td class="px-4 py-3 text-right">{run.clicks}</td>
+                    <td class="px-4 py-3 text-right">{run.durationSeconds ?? '-'}s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </>
+    ) : (
+      <div class="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+        <h1 class="text-3xl font-black text-stone-950">No has iniciado sesión</h1>
+        <p class="mt-2 text-stone-600">Puedes jugar como invitado o crear una cuenta para conservar tu historial.</p>
+        <div class="mt-5 flex gap-3">
+          <a class="rounded-md bg-sky-800 px-4 py-2 font-bold text-white" href="/login">Entrar</a>
+          <a class="rounded-md border border-stone-300 px-4 py-2 font-bold text-stone-700" href="/register">Crear cuenta</a>
+        </div>
+      </div>
+    )}
+  </section>
+</BaseLayout>

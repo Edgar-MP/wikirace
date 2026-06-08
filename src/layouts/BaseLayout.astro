@@ -1,0 +1,32 @@
+---
+import '@/styles/global.css';
+
+const { title = 'WikiRace' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Carreras entre artículos de Wikipedia: llega al objetivo con el menor número de clicks."
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="border-b border-stone-200 bg-[#fffdf7]/90 backdrop-blur">
+      <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href="/" class="text-xl font-black tracking-tight">WikiRace</a>
+        <div class="flex items-center gap-3 text-sm font-semibold text-stone-700">
+          <a class="hover:text-stone-950" href="/leaderboard">Ranking</a>
+          <a class="hover:text-stone-950" href="/profile">Perfil</a>
+        </div>
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

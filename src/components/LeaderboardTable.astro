@@ -1,0 +1,42 @@
+---
+import type { LeaderboardRow } from '@/lib/game/service';
+
+type Props = {
+  rows: LeaderboardRow[];
+};
+
+const { rows } = Astro.props;
+---
+
+{rows.length === 0 ? (
+  <div class="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-6 text-stone-600">
+    Aún no hay carreras completadas.
+  </div>
+) : (
+  <div class="overflow-hidden rounded-lg border border-stone-200">
+    <table class="w-full border-collapse bg-white text-left text-sm">
+      <thead class="bg-stone-100 text-xs uppercase tracking-[0.12em] text-stone-600">
+        <tr>
+          <th class="px-4 py-3">Jugador</th>
+          <th class="px-4 py-3">Ruta</th>
+          <th class="px-4 py-3">Idioma</th>
+          <th class="px-4 py-3 text-right">Clicks</th>
+          <th class="px-4 py-3 text-right">Tiempo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <tr class="border-t border-stone-200">
+            <td class="px-4 py-3 font-bold text-stone-950">{row.playerName}</td>
+            <td class="px-4 py-3 text-stone-700">
+              {row.startTitle} <span class="text-stone-400">-></span> {row.targetTitle}
+            </td>
+            <td class="px-4 py-3 uppercase text-stone-600">{row.lang}</td>
+            <td class="px-4 py-3 text-right font-bold">{row.clicks}</td>
+            <td class="px-4 py-3 text-right">{row.durationSeconds}s</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
