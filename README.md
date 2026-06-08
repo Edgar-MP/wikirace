@@ -99,3 +99,5 @@ pnpm astro:check
 pnpm build
 pnpm e2e
 ```
+
+Redeploy test: documentacion actualizada para validar el despliegue automatico.
