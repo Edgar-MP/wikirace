@@ -44,6 +44,7 @@ export function sanitizeWikiHtml(html: string, validLinks: string[]) {
       'em',
       'figcaption',
       'figure',
+      'img',
       'h1',
       'h2',
       'h3',
@@ -68,8 +69,25 @@ export function sanitizeWikiHtml(html: string, validLinks: string[]) {
       'ul',
     ],
     allowedAttributes: {
-      a: ['href', 'data-wiki-title', 'class'],
-      '*': ['class', 'id'],
+      a: ['href', 'title', 'data-wiki-title', 'class'],
+      img: ['src', 'srcset', 'alt', 'width', 'height', 'loading', 'decoding', 'class'],
+      table: ['class', 'style'],
+      td: ['class', 'colspan', 'rowspan', 'style'],
+      th: ['class', 'colspan', 'rowspan', 'scope', 'style'],
+      '*': ['class', 'id', 'title', 'role', 'aria-label'],
+    },
+    allowedSchemes: ['http', 'https', 'data'],
+    allowedSchemesByTag: {
+      img: ['http', 'https', 'data'],
+    },
+    allowedStyles: {
+      '*': {
+        'text-align': [/^left$/, /^right$/, /^center$/],
+        width: [/^\d+(\.\d+)?(px|em|rem|%)$/],
+        'max-width': [/^\d+(\.\d+)?(px|em|rem|%)$/],
+        float: [/^left$/, /^right$/],
+        clear: [/^left$/, /^right$/, /^both$/],
+      },
     },
     disallowedTagsMode: 'discard',
     transformTags: {

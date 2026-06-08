@@ -18,11 +18,13 @@ describe('wiki html helpers', () => {
     const html = `
       <p><a href="/wiki/Ada_Lovelace" onclick="alert(1)">Ada</a></p>
       <p><a href="/wiki/Special:Random">Random</a></p>
+      <img src="https://upload.wikimedia.org/example.jpg" alt="Example" onclick="alert(1)" />
       <script>alert(1)</script>
     `;
 
     const sanitized = sanitizeWikiHtml(html, ['Ada Lovelace']);
     expect(sanitized).toContain('data-wiki-title="Ada Lovelace"');
+    expect(sanitized).toContain('src="https://upload.wikimedia.org/example.jpg"');
     expect(sanitized).not.toContain('onclick');
     expect(sanitized).not.toContain('<script>');
     expect(sanitized).toContain('disabled-link');
